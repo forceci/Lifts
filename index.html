@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -142,7 +142,7 @@
 </style>
 </head>
 <body>
- 
+
 <div id="timer-overlay">
   <div class="timer-label">Descanso</div>
   <div class="timer-ex" id="timer-ex-name"></div>
@@ -158,18 +158,18 @@
   </div>
   <button class="timer-skip" onclick="skipTimer()">Saltar ↓</button>
 </div>
- 
+
 <div class="wrap">
   <header>
     <h1>Mis<span>Lifts</span></h1>
     <span class="sync-dot" id="sync-dot" title="sync"></span>
   </header>
- 
+
   <div class="nav">
     <button class="nav-btn active" id="btn-log" onclick="showView('log')">Entrenar</button>
     <button class="nav-btn" id="btn-prog" onclick="showView('progress')">Progreso</button>
   </div>
- 
+
   <!-- LOG VIEW -->
   <div id="main-view">
     <div class="date" id="today" style="margin-bottom:14px;font-size:13px;color:var(--dim);"></div>
@@ -178,7 +178,7 @@
     <div id="list"></div>
     <div class="tabata" id="tabata"></div>
   </div>
- 
+
   <!-- PROGRESS VIEW -->
   <div id="progress-view">
     <div class="cal-wrap">
@@ -204,8 +204,8 @@
     <div id="no-data-msg" class="no-data" style="display:none;">Sin datos para este ejercicio.</div>
   </div>
 </div>
- 
- 
+
+
 <!-- TABATA OVERLAY -->
 <div id="tabata-overlay">
   <div class="tb-phase" id="tb-phase">Calentamiento</div>
@@ -228,12 +228,12 @@
   </div>
 </div>
 <div class="toast" id="toast">Serie guardada ✓</div>
- 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 const SUPABASE_URL = "https://munhydmswvaszjmwzzqf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_1DHYN9WZS7jN0E3N2D2ehQ_CGW4dzAR";
- 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11bmh5ZG1zd3Zhc3pqbXd6enFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDkwNTksImV4cCI6MjA5NzcyNTA1OX0._pGvxsqVRnEN7gqI4r3Bg8ba5QwO9uHbD8wgwDpEgZM";
+
 const PLAN = [
   {label:"Cuádriceps", tabata:"Elíptica — 8 rondas 20/10 a tope", exercises:[
     {id:"sentadilla", name:"Sentadilla barra/goblet", target:"4×6-8"},
@@ -265,22 +265,22 @@ const PLAN = [
     {id:"crunch",     name:"Abdominales normales",        target:"3×15-20"},
   ]},
 ];
- 
+
 const ALL_EX = PLAN.flatMap((d,di)=>d.exercises.map(e=>({...e,day_index:di})));
- 
+
 const REST_SECS = 75;
 let day=0, logs={}, openId=null, currentView='log';
 let timerInterval=null, timerLeft=0;
 let chartWeight=null, chartVol=null;
- 
+
 const $=id=>document.getElementById(id);
 const fmtDate=d=>new Date(d).toLocaleDateString('es-UY',{day:'numeric',month:'short'});
 $('today').textContent=new Date().toLocaleDateString('es-UY',{weekday:'long',day:'numeric',month:'long'});
- 
+
 /* ── SYNC DOT ── */
 function syncOk(){ const d=$('sync-dot'); d.className='sync-dot ok'; setTimeout(()=>d.className='sync-dot',2000); }
 function syncErr(){ $('sync-dot').className='sync-dot err'; }
- 
+
 /* ── SUPABASE ── */
 async function sbFetch(path, opts={}){
   const res = await fetch(SUPABASE_URL+'/rest/v1/'+path, {
@@ -291,7 +291,7 @@ async function sbFetch(path, opts={}){
   if(!res.ok) throw new Error(await res.text());
   return res;
 }
- 
+
 async function loadFromDB(){
   try{
     const res = await sbFetch('lifts?select=*&order=created_at.asc');
@@ -305,7 +305,7 @@ async function loadFromDB(){
   } catch(e){ syncErr(); loadLocal(); }
   render();
 }
- 
+
 async function insertRow(exId, exName, dayIdx, w, r){
   try{
     await sbFetch('lifts', { method:'POST',
@@ -313,14 +313,14 @@ async function insertRow(exId, exName, dayIdx, w, r){
     syncOk();
   } catch(e){ syncErr(); }
 }
- 
+
 async function deleteRow(dbid){
   try{
     await sbFetch('lifts?id=eq.'+dbid, {method:'DELETE'});
     syncOk();
   } catch(e){ syncErr(); }
 }
- 
+
 /* ── LOCAL FALLBACK ── */
 function loadLocal(){
   try{ const r=localStorage.getItem('lift-logs'); if(r) logs=JSON.parse(r); }catch(e){ logs={}; }
@@ -328,13 +328,13 @@ function loadLocal(){
 function persistLocal(){
   try{ localStorage.setItem('lift-logs',JSON.stringify(logs)); }catch(e){}
 }
- 
+
 /* ── HELPERS ── */
 function lastEntry(id){ const l=logs[id]; return l&&l.length?l[l.length-1]:null; }
 function targetSets(t){ const m=t.match(/^\s*(\d+)/); return m?parseInt(m[1]):0; }
 function isToday(ts){ const d=new Date(ts),n=new Date(); return d.getDate()===n.getDate()&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }
 function setsToday(id){ return (logs[id]||[]).filter(e=>isToday(e.d)).length; }
- 
+
 /* ── TIMER ── */
 function startTimer(exName){
   clearInterval(timerInterval);
@@ -352,7 +352,7 @@ function updateTimerUI(){
   $('timer-ring').classList.toggle('urgent',timerLeft<=15);
 }
 window.skipTimer=function(){ clearInterval(timerInterval); $('timer-overlay').classList.remove('visible'); };
- 
+
 /* ── VIEWS ── */
 window.showView=function(v){
   currentView=v;
@@ -362,14 +362,14 @@ window.showView=function(v){
   $('btn-prog').classList.toggle('active', v==='progress');
   if(v==='progress') initProgress();
 };
- 
+
 /* ── RENDER LOG ── */
 function render(){
   $('tabs').innerHTML=PLAN.map((d,i)=>
     `<div class="tab ${i===day?'active':''}" onclick="setDay(${i})"><span class="n">${i+1}</span><span class="l">${d.label}</span></div>`).join('');
   $('daytitle').textContent=`Día ${day+1} — ${PLAN[day].label}`;
   $('tabata').innerHTML=`<b>Tabata final</b><div style='display:flex;justify-content:space-between;align-items:center;gap:10px'><span>${PLAN[day].tabata}</span><button onclick='startTabata()' style='background:var(--acid);color:var(--acid-ink);border:none;border-radius:8px;font-family:Archivo,sans-serif;font-weight:900;font-size:12px;padding:8px 14px;cursor:pointer;text-transform:uppercase;white-space:nowrap;'>▶ Iniciar</button></div>`;
- 
+
   $('list').innerHTML=PLAN[day].exercises.map(ex=>{
     const last=lastEntry(ex.id);
     const open=openId===ex.id;
@@ -410,7 +410,7 @@ function render(){
     </div>`;
   }).join('');
 }
- 
+
 /* ── ACTIONS ── */
 window.setDay=i=>{ day=i; openId=null; render(); };
 window.toggle=id=>{ openId=openId===id?null:id; render(); };
@@ -436,12 +436,12 @@ window.saveLog=async(id,name,dayIdx)=>{
     if(res.ok){ const rows=await res.json(); if(rows[0]) entry.dbid=rows[0].id; }
     syncOk();
   } catch(e){ syncErr(); }
- 
+
   const exObj=PLAN[day].exercises.find(e=>e.id===id);
   const tgt=targetSets(exObj?exObj.target:'');
   const done=setsToday(id);
   const isLastSet=tgt>0&&done>=tgt;
- 
+
   if(isLastSet){
     const exList=PLAN[day].exercises;
     const idx=exList.findIndex(e=>e.id===id);
@@ -460,7 +460,7 @@ window.delEntry=async(id,idx,dbid)=>{
   if(dbid) await deleteRow(dbid);
   render();
 };
- 
+
 /* ── PROGRESS ── */
 function initProgress(){
   const sel=$('ex-select');
@@ -468,16 +468,16 @@ function initProgress(){
   renderCalendar();
   renderChart();
 }
- 
+
 window.renderChart=function(){
   const id=$('ex-select').value;
   const entries=(logs[id]||[]).slice().sort((a,b)=>a.d-b.d);
- 
+
   $('no-data-msg').style.display=entries.length?'none':'block';
   $('stat-row').innerHTML='';
- 
+
   if(!entries.length){ destroyCharts(); return; }
- 
+
   // group by day (date string)
   const byDay={};
   entries.forEach(e=>{
@@ -488,7 +488,7 @@ window.renderChart=function(){
   const labels=Object.keys(byDay);
   const maxWeights=labels.map(dk=>Math.max(...byDay[dk].map(e=>e.w)));
   const volumes=labels.map(dk=>byDay[dk].reduce((s,e)=>s+e.w*e.r,0));
- 
+
   // stats
   const allW=entries.map(e=>e.w);
   const pb=Math.max(...allW);
@@ -499,7 +499,7 @@ window.renderChart=function(){
     <div class="stat"><b>${pb}</b><span>PB kg</span></div>
     <div class="stat"><b>${last}</b><span>Último kg</span></div>
     <div class="stat"><b>${gain>0?'+':''}${gain}%</b><span>Progreso</span></div>`;
- 
+
   const cfg=(data,color)=>({
     type:'line',
     data:{ labels, datasets:[{ data, borderColor:color, backgroundColor:color+'22',
@@ -508,22 +508,22 @@ window.renderChart=function(){
       scales:{ x:{ticks:{color:'#9aa3a7',font:{size:11}},grid:{color:'#2e3437'}},
                 y:{ticks:{color:'#9aa3a7',font:{size:11}},grid:{color:'#2e3437'}} } }
   });
- 
+
   destroyCharts();
   chartWeight=new Chart($('chart-weight').getContext('2d'), cfg(maxWeights,'#d8f34e'));
   chartVol   =new Chart($('chart-vol').getContext('2d'),    cfg(volumes,'#7ec8e3'));
 };
- 
+
 function destroyCharts(){
   if(chartWeight){ chartWeight.destroy(); chartWeight=null; }
   if(chartVol){ chartVol.destroy(); chartVol=null; }
 }
- 
- 
- 
+
+
+
 /* ── CALENDAR ── */
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
- 
+
 function gymDays(){
   // collect all unique dates (YYYY-MM-DD) that have at least one log entry
   const days=new Set();
@@ -535,23 +535,23 @@ function gymDays(){
   });
   return days;
 }
- 
+
 function renderCalendar(){
   const gym=gymDays();
   const now=new Date();
   const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   $('cal-title').textContent=`${months[calMonth]} ${calYear}`;
- 
+
   const firstDay=new Date(calYear,calMonth,1).getDay(); // 0=Sun
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const todayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
- 
+
   const dows=['D','L','M','X','J','V','S'];
   let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
- 
+
   // empty cells before first day
   for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
- 
+
   for(let d=1;d<=daysInMonth;d++){
     const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isGym=gym.has(key);
@@ -560,13 +560,13 @@ function renderCalendar(){
     html+=`<div class="${cls}"><div class="cal-day-inner"><span>${d}</span>${isGym?'<span class="cal-check">✓</span>':''}</div></div>`;
   }
   $('cal-grid').innerHTML=html;
- 
+
   // streak calculation
   const streak=calcStreak(gym, now);
   const total=gym.size;
   $('cal-streak').innerHTML=`<span>Racha <b>${streak}</b> día${streak!==1?'s':''}</span><span>Total <b>${total}</b> visita${total!==1?'s':''}</span>`;
 }
- 
+
 function calcStreak(gymSet, now){
   let streak=0, d=new Date(now);
   // start from yesterday if today not yet logged
@@ -580,14 +580,14 @@ function calcStreak(gymSet, now){
   }
   return streak;
 }
- 
+
 window.calPrev=function(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); };
 window.calNext=function(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); };
- 
+
 /* ── TABATA ENGINE ── */
 // Sequence: warmup(300) → 8x[work(30),rest(90)] → cooldown(300)
 let tbSeq=[], tbIdx=0, tbLeft=0, tbInterval=null;
- 
+
 function buildSeq(){
   const s=[];
   s.push({type:'warm',label:'WARM UP',phase:'Calentamiento',secs:300,round:0});
@@ -598,14 +598,14 @@ function buildSeq(){
   s.push({type:'cool',label:'COOL DOWN',phase:'Enfriamiento',secs:300,round:0});
   return s;
 }
- 
+
 window.startTabata=function(){
   tbSeq=buildSeq(); tbIdx=0;
   document.getElementById('tabata-overlay').classList.add('visible');
   renderDots();
   loadPhase();
 };
- 
+
 function loadPhase(){
   if(tbIdx>=tbSeq.length){ tbStop(); return; }
   const ph=tbSeq[tbIdx];
@@ -627,7 +627,7 @@ function loadPhase(){
     if(tbLeft<=0){ clearInterval(tbInterval); tbIdx++; loadPhase(); }
   },1000);
 }
- 
+
 function updateTbUI(total){
   const m=Math.floor(tbLeft/60),s=tbLeft%60;
   document.getElementById('tb-display').textContent=`${m}:${s.toString().padStart(2,'0')}`;
@@ -635,12 +635,12 @@ function updateTbUI(total){
   const pct=tbLeft/total;
   document.getElementById('tb-ring-fg').style.strokeDashoffset=circ*(1-pct);
 }
- 
+
 function renderDots(){
   const wrap=document.getElementById('tb-dots');
   wrap.innerHTML=Array.from({length:8},(_,i)=>`<div class="tb-dot" id="dot-${i+1}"></div>`).join('');
 }
- 
+
 function updateDots(activeRound){
   for(let i=1;i<=8;i++){
     const d=document.getElementById('dot-'+i);
@@ -650,13 +650,13 @@ function updateDots(activeRound){
     else d.className='tb-dot';
   }
 }
- 
+
 window.tbSkipPhase=function(){ clearInterval(tbInterval); tbIdx++; loadPhase(); };
 window.tbStop=function(){
   clearInterval(tbInterval);
   document.getElementById('tabata-overlay').classList.remove('visible');
 };
- 
+
 /* ── INIT ── */
 loadFromDB();
 </script>
