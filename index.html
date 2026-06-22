@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mis Lifts</title>
+<meta name="theme-color" content="#101213">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Lifts">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Space+Grotesk:wght@400;500;700&display=swap');
+  :root{
+    --bg:#101213; --panel:#1a1d1f; --panel2:#222628; --line:#2e3437;
+    --ink:#f2f0ec; --dim:#9aa3a7; --acid:#d8f34e; --acid-ink:#1a1d00;
+    --danger:#ff6a5e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; min-height:100vh;}
+  .wrap{max-width:520px; margin:0 auto; padding:16px 16px 90px;}
+  header{display:flex; align-items:baseline; justify-content:space-between; margin:8px 0 18px;}
+  h1{font-family:'Archivo',sans-serif; font-stretch:90%; font-weight:900; font-size:26px; letter-spacing:-.5px; margin:0; text-transform:uppercase;}
+  h1 span{color:var(--acid)}
+  .date{color:var(--dim); font-size:13px;}
+  /* day tabs */
+  .tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;}
+  .tab{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 4px; text-align:center; cursor:pointer; transition:all .15s;}
+  .tab .n{font-family:'Archivo'; font-weight:900; font-size:20px; display:block;}
+  .tab .l{font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.5px;}
+  .tab.active{background:var(--acid); border-color:var(--acid); color:var(--acid-ink);}
+  .tab.active .l{color:var(--acid-ink);}
+  .daytitle{font-size:13px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:0 0 12px 4px;}
+  /* exercise card */
+  .ex{background:var(--panel); border:1px solid var(--line); border-radius:14px; margin-bottom:10px; overflow:hidden;}
+  .ex-head{display:flex; justify-content:space-between; align-items:center; padding:14px; cursor:pointer;}
+  .ex-name{font-weight:700; font-size:15px;}
+  .ex-target{font-size:12px; color:var(--dim); margin-top:2px;}
+  .ex-last{font-family:'Archivo'; font-weight:700; font-size:14px; color:var(--acid); white-space:nowrap;}
+  .ex-last small{display:block; font-family:'Space Grotesk'; font-weight:400; font-size:10px; color:var(--dim); text-align:right;}
+  .ex-body{display:none; padding:0 14px 14px; border-top:1px dashed var(--line);}
+  .ex.open .ex-body{display:block;}
+  .ex.done{border-color:var(--acid); background:linear-gradient(var(--panel),var(--panel)) padding-box, var(--panel);}
+  .ex.done .ex-name{color:var(--acid);}
+  .prog{color:var(--dim); font-variant-numeric:tabular-nums;}
+  .ex.done .prog{color:var(--acid);}
+  .badge{font-family:'Archivo'; font-weight:900; font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--acid-ink); background:var(--acid); padding:6px 12px; border-radius:99px; white-space:nowrap;}
+  .logrow{display:flex; gap:8px; align-items:stretch; margin-top:12px;}
+  .stepper{flex:1; background:var(--panel2); border-radius:10px; display:flex; align-items:center; justify-content:space-between; padding:4px;}
+  .stepper button{background:none; border:none; color:var(--acid); font-size:22px; font-weight:700; width:42px; height:42px; cursor:pointer; font-family:'Archivo';}
+  .stepper .val{text-align:center;}
+  .stepper .val b{font-family:'Archivo'; font-weight:900; font-size:20px; display:block;}
+  .stepper .val span{font-size:10px; color:var(--dim); text-transform:uppercase;}
+  .save{background:var(--acid); color:var(--acid-ink); border:none; border-radius:10px; font-family:'Archivo'; font-weight:900; font-size:13px; padding:0 16px; cursor:pointer; text-transform:uppercase;}
+  .hist{margin-top:12px;}
+  .hist-row{display:flex; justify-content:space-between; font-size:13px; padding:6px 2px; border-bottom:1px solid var(--line); color:var(--dim);}
+  .hist-row b{color:var(--ink); font-family:'Archivo';}
+  .hist-row .del{color:var(--danger); cursor:pointer; padding:0 4px;}
+  .empty{font-size:12px; color:var(--dim); margin-top:10px; font-style:italic;}
+  .tabata{background:repeating-linear-gradient(-45deg, var(--panel), var(--panel) 10px, var(--panel2) 10px, var(--panel2) 20px); border:1px solid var(--line); border-radius:14px; padding:14px; font-size:14px; margin-top:4px;}
+  .tabata b{color:var(--acid); font-family:'Archivo'; text-transform:uppercase; letter-spacing:1px; font-size:12px; display:block; margin-bottom:4px;}
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--acid); color:var(--acid-ink); font-family:'Archivo'; font-weight:900; padding:10px 20px; border-radius:99px; font-size:13px; transition:transform .25s; text-transform:uppercase;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mis<span>Lifts</span></h1>
+    <div class="date" id="today"></div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <p class="daytitle" id="daytitle"></p>
+  <div id="list"></div>
+  <div class="tabata" id="tabata"></div>
+</div>
+<div class="toast" id="toast">Guardado ✓</div>
+
+<script>
+const PLAN = [
+  {label:"Cuádriceps", tabata:"Elíptica — 8 rondas 20/10 a tope", exercises:[
+    {id:"sentadilla", name:"Sentadilla barra/goblet", target:"4×6-8"},
+    {id:"prensa", name:"Prensa", target:"3×10"},
+    {id:"bulgara", name:"Sentadilla búlgara", target:"3×10 c/pierna"},
+    {id:"extension", name:"Extensión de cuádriceps", target:"3×12"},
+    {id:"plancha", name:"Plancha", target:"3×40 seg"},
+  ]},
+  {label:"Empuje", tabata:"Elíptica — 8 rondas 20/10 a tope", exercises:[
+    {id:"banca", name:"Press banca", target:"4×6-8"},
+    {id:"militar", name:"Press militar", target:"3×8"},
+    {id:"inclinado", name:"Press inclinado mancuernas", target:"3×10"},
+    {id:"laterales", name:"Vuelos laterales", target:"3×12-15"},
+    {id:"triceps", name:"Tríceps en polea / fondos", target:"3×12"},
+  ]},
+  {label:"Posterior", tabata:"Elíptica — 8 rondas 20/10 a tope", exercises:[
+    {id:"rumano", name:"Peso muerto rumano", target:"4×6-8"},
+    {id:"hipthrust", name:"Hip thrust", target:"4×8-10"},
+    {id:"femoral", name:"Curl femoral", target:"3×12"},
+    {id:"abduccion", name:"Abducción en máquina", target:"3×15"},
+    {id:"hiperext", name:"Hiperextensiones 45°", target:"3×12"},
+  ]},
+  {label:"Tracción", tabata:"Elíptica — 8 rondas 20/10 a tope", exercises:[
+    {id:"jalon", name:"Jalón al pecho / dominadas", target:"4×6-8"},
+    {id:"remo", name:"Remo barra/máquina", target:"4×8-10"},
+    {id:"remouni", name:"Remo unilateral mancuerna", target:"3×10"},
+    {id:"biceps", name:"Curl bíceps", target:"3×12"},
+    {id:"posteriores", name:"Vuelos posteriores máquina", target:"3×15"},
+    {id:"crunch", name:"Abdominales normales", target:"3×15-20"},
+  ]},
+];
+
+let day = 0, logs = {}, openId = null;
+const $ = id => document.getElementById(id);
+
+const fmtDate = d => new Date(d).toLocaleDateString('es-UY',{day:'numeric',month:'short'});
+$('today').textContent = new Date().toLocaleDateString('es-UY',{weekday:'long', day:'numeric', month:'long'});
+
+function load(){
+  try{
+    const r = localStorage.getItem('lift-logs');
+    if(r) logs = JSON.parse(r);
+  }catch(e){ logs = {}; }
+  render();
+}
+function persist(){
+  try{ localStorage.setItem('lift-logs', JSON.stringify(logs)); }
+  catch(e){ console.error('No se pudo guardar', e); }
+}
+
+function lastEntry(id){ const l = logs[id]; return l && l.length ? l[l.length-1] : null; }
+function targetSets(target){ const m = target.match(/^\s*(\d+)/); return m ? parseInt(m[1]) : 0; }
+function isToday(ts){ const d=new Date(ts), n=new Date(); return d.getDate()===n.getDate()&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }
+function setsToday(id){ return (logs[id]||[]).filter(e=>isToday(e.d)).length; }
+
+function render(){
+  // tabs
+  $('tabs').innerHTML = PLAN.map((d,i)=>
+    `<div class="tab ${i===day?'active':''}" onclick="setDay(${i})"><span class="n">${i+1}</span><span class="l">${d.label}</span></div>`).join('');
+  $('daytitle').textContent = `Día ${day+1} — ${PLAN[day].label}`;
+  $('tabata').innerHTML = `<b>Tabata final</b>${PLAN[day].tabata}`;
+  // exercises
+  $('list').innerHTML = PLAN[day].exercises.map(ex=>{
+    const last = lastEntry(ex.id);
+    const open = openId===ex.id;
+    const tgt = targetSets(ex.target);
+    const done = setsToday(ex.id);
+    const completed = tgt>0 && done>=tgt;
+    const w = open ? (document.querySelector(`#w-${ex.id}`)?.textContent ?? (last?last.w:20)) : (last?last.w:20);
+    const r = open ? (document.querySelector(`#r-${ex.id}`)?.textContent ?? (last?last.r:8)) : (last?last.r:8);
+    const hist = (logs[ex.id]||[]).slice(-6).reverse().map((e,idx,arr)=>{
+      const realIdx = (logs[ex.id].length-1)-idx;
+      return `<div class="hist-row"><span>${fmtDate(e.d)}</span><span><b>${e.w} kg</b> × ${e.r}</span><span class="del" onclick="delEntry('${ex.id}',${realIdx})">✕</span></div>`;
+    }).join('');
+    const headRight = completed
+      ? `<div class="badge">✓ Completado</div>`
+      : `<div class="ex-last">${last?`${last.w} kg`:'—'}<small>${last?fmtDate(last.d):'sin registro'}</small></div>`;
+    return `<div class="ex ${open?'open':''} ${completed?'done':''}">
+      <div class="ex-head" onclick="toggle('${ex.id}')">
+        <div><div class="ex-name">${ex.name}</div><div class="ex-target">${ex.target} · <span class="prog">${done}/${tgt} sets</span></div></div>
+        ${headRight}
+      </div>
+      <div class="ex-body">
+        <div class="logrow">
+          <div class="stepper">
+            <button onclick="bump('w-${ex.id}',-2.5)">−</button>
+            <div class="val"><b id="w-${ex.id}">${w}</b><span>kg</span></div>
+            <button onclick="bump('w-${ex.id}',2.5)">+</button>
+          </div>
+          <div class="stepper">
+            <button onclick="bump('r-${ex.id}',-1)">−</button>
+            <div class="val"><b id="r-${ex.id}">${r}</b><span>reps</span></div>
+            <button onclick="bump('r-${ex.id}',1)">+</button>
+          </div>
+          <button class="save" onclick="saveLog('${ex.id}')">OK</button>
+        </div>
+        <div class="hist">${hist || '<div class="empty">Todavía no registraste este ejercicio.</div>'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.setDay = i => { day=i; openId=null; render(); };
+window.toggle = id => { openId = openId===id ? null : id; render(); };
+window.bump = (elId, step) => {
+  const el = $(elId);
+  let v = parseFloat(el.textContent) + step;
+  if(v < 0) v = 0;
+  el.textContent = (Math.round(v*10)/10).toString().replace(/\.0$/,'');
+};
+window.saveLog = id => {
+  const w = parseFloat($('w-'+id).textContent);
+  const r = parseInt($('r-'+id).textContent);
+  if(!logs[id]) logs[id]=[];
+  logs[id].push({d:Date.now(), w, r});
+  persist();
+  render();
+  const t = $('toast'); t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1400);
+};
+window.delEntry = (id, idx) => {
+  logs[id].splice(idx,1);
+  persist();
+  render();
+};
+
+load();
+</script>
+</body>
+</html>
